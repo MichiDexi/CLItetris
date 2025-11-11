@@ -20,18 +20,10 @@ use crossterm::{
 	event::KeyCode
 };
 
-
+// Files
 mod renderer;
 mod current_piece;
 mod input;
-
-
-//
-// MAIN FUNCTION
-// |
-// |-> Entry point
-//
-
 
 
 fn main() -> io::Result<()> {
