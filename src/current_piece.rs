@@ -31,7 +31,7 @@ pub struct CurrentObject {
 pub fn tick_obj(
 	matrix : &mut SMatrix<u8, 10, 18>,
 	obj : &mut CurrentObject,
-	input : (i8, i8, bool, bool),
+	input : (i8, i8, bool, bool), // x, r, soft, hard
 	score_vars : (&mut u8, &mut u32, &mut u32)) -> io::Result<()>
 {
 
@@ -52,6 +52,15 @@ pub fn tick_obj(
 	}
 	
 	// Vertical movement
+	if input.3 {
+		for _ in 0..20 {
+			if try_move(matrix, obj, 0, 1) {
+				obj.cy += 1;
+			}
+			else { break; }
+		}
+		obj.tick_delay = 0;
+	}
 	if obj.tick_delay <= 0 {
 		if try_move(matrix, obj, 0, 1) {
 			obj.cy += 1;

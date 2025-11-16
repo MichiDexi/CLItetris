@@ -93,9 +93,7 @@ fn game(
 	
 
 	// Main loop
-	let mut running : bool = true;
-	
-	while running {
+	loop {
 	
 		let now = Instant::now(); // Get frame time
 		let input_check = input::poll_input(input_obj); // Poll input
@@ -106,7 +104,7 @@ fn game(
 			(&mut level, &mut score, &mut lines)
 		);
 		if cur_obj.dead { // Check to stop the game if the piece is stuck
-			running = false;
+			break;
 		}
 
 		// Other
@@ -117,7 +115,7 @@ fn game(
 			}
 		}
 		if input_check.5 { // Quit key
-			running = false;
+			break;
 		}
 
 		// Render
