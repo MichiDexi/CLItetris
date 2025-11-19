@@ -9,26 +9,6 @@ use nalgebra::SMatrix;
 
 use crate::current_piece::CurrentObject;
 
-/*
-pub fn render_all(obj : &CurrentObject, map : SMatrix<u8, 10, 18>, level : u8, score : u32, lines : u32) -> io::Result<()> {
-	let (cols, rows) = size().unwrap();
-
-
-	let mut playfield_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros(); // x0/11 & y19 are borders
-	let mut piecepreview_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros();
-	
-
-
-	
-	update_display(x_offset, y_offset, level, score, lines)?;
-	update_piece_preview(x_offset, y_offset, obj);
-
-	render_buffer(&playfield_buffer, x_offset, y_offset);
-	
-	Ok(())
-}
-*/
-
 pub fn inject_buffers(
 	playfield_buffer : &mut SMatrix<u8, 12, 19>,
 	piecepreview_buffer : &mut SMatrix<u8, 6, 6>,
@@ -36,7 +16,9 @@ pub fn inject_buffers(
 	level : u8, score : u32, lines : u32) {
 
 	playfield(playfield_buffer, &map);
-	player_object(playfield_buffer, obj);
+	if obj.exists {
+		player_object(playfield_buffer, obj);
+	}
 }
 
 pub fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObject) {
@@ -110,89 +92,4 @@ pub fn render_buffer(buffer : &SMatrix<u8, 12, 19>, x_offset : u8, y_offset : u8
 		}
 	}
 	Ok(())
-}
-
-
-
-
-
-
-fn update_display(
-	x_offset : u8,
-	y_offset : u8,
-	level : u8,
-	score : u32,
-	lines : u32) -> io::Result<()> {
-
-	let mut stdout = stdout();
-
-	write!(stdout, "\x1b[38;5;7m")?;
-	
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 3 +y_offset as u16)).unwrap();
-	write!(stdout, "Score").unwrap();
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 4 +y_offset as u16)).unwrap();
-	write!(stdout, "{}", score).unwrap();
-	
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 6 +y_offset as u16)).unwrap();
-	write!(stdout, "Lines").unwrap();
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 7 +y_offset as u16)).unwrap();
-	write!(stdout, "{}", lines).unwrap();
-	
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 9 +y_offset as u16)).unwrap();
-	write!(stdout, "Level").unwrap();
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 10 +y_offset as u16)).unwrap();
-	write!(stdout, "{}", level).unwrap();
-	
-	stdout.flush().unwrap(); // flush manually
-	Ok(())
-}
-
-fn update_piece_preview(
-	x_offset : u8,
-	y_offset : u8,
-	obj : &CurrentObject) {
-
-	let mut stdout = stdout();
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 12 +y_offset as u16)).unwrap();
-	write!(stdout, "Next").unwrap();
-
-	execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 13 +y_offset as u16)).unwrap();
-	match obj.pieces[1] {
-		0 => { // L : 000
-			write!(stdout, "██████").unwrap();
-			execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "██").unwrap();
-		}
-		1 => { // J : 001
-			write!(stdout, "██████").unwrap();
-			execute!(stdout, cursor::MoveTo(32 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "██").unwrap();
-		}
-		2 => { // I : 010
-			write!(stdout, "████████").unwrap();
-		}
-		3 => { // O : 011
-			write!(stdout, "████").unwrap();
-			execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "████").unwrap();
-		}
-		4 => { // Z : 100
-			write!(stdout, "████").unwrap();
-			execute!(stdout, cursor::MoveTo(30 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "████").unwrap();
-		}
-		5 => { // S : 101
-			execute!(stdout, cursor::MoveTo(30 +x_offset as u16, 13 +y_offset as u16)).unwrap();
-			write!(stdout, "████").unwrap();
-			execute!(stdout, cursor::MoveTo(28 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "████").unwrap();
-		}
-		6 => { // T : 110
-			write!(stdout, "██████").unwrap();
-			execute!(stdout, cursor::MoveTo(30 +x_offset as u16, 14 +y_offset as u16)).unwrap();
-			write!(stdout, "██").unwrap();
-		}
-		_ => { }
-	}
-	stdout.flush().unwrap(); // flush manually
 }
