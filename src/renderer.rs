@@ -9,29 +9,37 @@ use nalgebra::SMatrix;
 
 use crate::current_piece::CurrentObject;
 
-
+/*
 pub fn render_all(obj : &CurrentObject, map : SMatrix<u8, 10, 18>, level : u8, score : u32, lines : u32) -> io::Result<()> {
 	let (cols, rows) = size().unwrap();
-	let x_offset = (cols/2) as u8 -18;
-	let y_offset = (rows/2) as u8 -9;
+
 
 	let mut playfield_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros(); // x0/11 & y19 are borders
+	let mut piecepreview_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros();
+	
 
-	playfield(&mut playfield_buffer, &map);
-	player_object(&mut playfield_buffer, obj);
-	border(&mut playfield_buffer);
-	render_buffer(&playfield_buffer, x_offset, y_offset)?;
-	// render(obj, map, x_offset, y_offset)?;
-	// update_border(x_offset, y_offset)?;
+
+	
 	update_display(x_offset, y_offset, level, score, lines)?;
 	update_piece_preview(x_offset, y_offset, obj);
 
-	
+	render_buffer(&playfield_buffer, x_offset, y_offset);
 	
 	Ok(())
 }
+*/
 
-fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObject) {
+pub fn inject_buffers(
+	playfield_buffer : &mut SMatrix<u8, 12, 19>,
+	piecepreview_buffer : &mut SMatrix<u8, 6, 6>,
+	obj : &CurrentObject, map : SMatrix<u8, 10, 18>,
+	level : u8, score : u32, lines : u32) {
+
+	playfield(playfield_buffer, &map);
+	player_object(playfield_buffer, obj);
+}
+
+pub fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObject) {
 
 	// Set positions
 	
@@ -59,7 +67,7 @@ fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObject)
 	}
 }
 
-fn check_out_of_bounds(x : i8, y : i8) -> bool {
+pub fn check_out_of_bounds(x : i8, y : i8) -> bool {
 	if x > -1 && x < 12 &&
 		y > -1 && y < 19 {
 
@@ -69,7 +77,7 @@ fn check_out_of_bounds(x : i8, y : i8) -> bool {
 	false
 }
 
-fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
+pub fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
 	// Write map (with x_offset of 1) into buffer
 	for x in 0..10 {
 		for y in 0..18 {
@@ -78,7 +86,7 @@ fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
 	}
 }
 
-fn border(buffer : &mut SMatrix<u8, 12, 19>) {
+pub fn border(buffer : &mut SMatrix<u8, 12, 19>) {
 	// Walls
 	for y in 0..19 {
 		buffer[(0,  y)] = 7;
@@ -91,7 +99,7 @@ fn border(buffer : &mut SMatrix<u8, 12, 19>) {
 	}
 }
 
-fn render_buffer(buffer : &SMatrix<u8, 12, 19>, x_offset : u8, y_offset : u8) -> io::Result<()> {
+pub fn render_buffer(buffer : &SMatrix<u8, 12, 19>, x_offset : u8, y_offset : u8) -> io::Result<()> {
 
 	let mut stdout = stdout();
 	

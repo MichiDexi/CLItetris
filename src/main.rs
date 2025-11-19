@@ -16,6 +16,7 @@ use std::{
 	thread::sleep
 };
 use crossterm::{
+	terminal::size,
 	execute,
 	cursor,
 	event::KeyCode
@@ -33,9 +34,11 @@ const TARGET_FPS : f32 = 59.73;
 
 // Entry point
 fn main() -> io::Result<()> {
-	
+
+	// Setup
 	let frame_time : Duration = Duration::from_secs_f32(1.0 / TARGET_FPS); // Calculates the time per frame
 	print!("\x1B[?25l"); // hide cursor
+
 	
 	// TODO: Add Gameboard size, start level, visual size change with Arguments
 	// |-> let args: Vec<String> = env::args().collect();
@@ -72,7 +75,7 @@ fn game(
 	let mut lines : u32 = 0;
 
 	// Game setup
-	let mut map : SMatrix<u8, 10, 18> = SMatrix::zeros(); // matrix stuff 10x18
+	
 	let mut cur_obj = current_piece::CurrentObject {
 		cx: 0,
 		cy: 0,
@@ -91,13 +94,22 @@ fn game(
 		pieces : vec!(0, 0),
 	};
 	let _ = cur_obj.reset_obj(); // Piece gets reset
-	
+
+	let mut map : SMatrix<u8, 10, 18> = SMatrix::zeros(); // The playfield
+	let mut playfield_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros(); // Used to render playfield
+	let mut piecepreview_buffer : SMatrix<u8, 6, 6> = SMatrix::zeros(); // Used to render piece preview
+	renderer::border(&mut playfield_buffer);
+
+	let (cols, rows) = size().unwrap(); // Gets size of terminal
+	let x_offset = (cols/2) as u8 -18; // Render x offset
+	let y_offset = (rows/2) as u8 -9; // Render y offset
 
 	// Main loop
 	loop {
 	
 		let now = Instant::now(); // Get frame time
 		let input_check = input::poll_input(input_obj); // Poll input
+
 
 		// Player object
 		let _ = cur_obj.tick_obj(&mut map,
@@ -111,28 +123,6 @@ fn game(
 		// Other
 		if input_check.4 { // Pause key
 
-			// Pause render initialization
-			let obj_paused_render = current_piece::CurrentObject {
-				cx: 0,
-				cy: 30,
-				x1: 0,
-				y1: 0,
-				x2: 0,
-				y2: 0,
-				x3: 0,
-				y3: 0,
-				tick_delay: 0,
-				exists: false,
-				exist_delay: 100,
-				otype: 0,
-				move_delay: 15,
-				dead : false,
-				pieces : cur_obj.pieces.clone(),
-			};
-			let map_paused_render : SMatrix<u8, 10, 18> = SMatrix::zeros();
-
-			// Render
-			let _ = renderer::render_all(&obj_paused_render, map_paused_render, level, score, lines);
 
 			// Wait for unpause
 			loop {
@@ -151,7 +141,8 @@ fn game(
 		}
 
 		// Render
-		let _ = renderer::render_all(&cur_obj, map, level, score, lines);
+		renderer::inject_buffers(&mut playfield_buffer, &mut piecepreview_buffer, &cur_obj, map, level, score, lines);
+		let _ = renderer::render_buffer(&playfield_buffer, x_offset, y_offset);
 
 		// Frame time management for consistent framerate
 		let frame_duration = Instant::now().duration_since(now);
