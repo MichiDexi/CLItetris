@@ -126,6 +126,9 @@ impl CurrentObject {
 		}
 		else {
 			self.move_delay -= 1;
+			if input.0 == 0 {
+				self.move_delay = 0;
+			}
 		}
 
 		if input.1 != 0 && self.try_rotate(matrix, input.1) {
