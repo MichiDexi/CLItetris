@@ -192,14 +192,14 @@ pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObj
 
 fn clear_piece_preview(preview : &mut SMatrix<u8, 6, 6>) {
 	for i in 0..6 {
-		preview[(i, 0)] = 1;
-		preview[(i, 5)] = 1;
+		preview[(i, 0)] = 7;
+		preview[(i, 5)] = 7;
 		for j in 1..5 {
 			preview[(i, j)] = 0;
 		}
 	}
 	for i in 1..5 {
-		preview[(0, i)] = 1;
-		preview[(5, i)] = 1;
+		preview[(0, i)] = 7;
+		preview[(5, i)] = 7;
 	}
 }
