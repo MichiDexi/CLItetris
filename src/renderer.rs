@@ -1,5 +1,4 @@
 use crossterm::{
-	terminal::size,
 	execute,
 	cursor
 };
@@ -11,9 +10,7 @@ use crate::current_piece::CurrentObject;
 
 pub fn inject_buffers(
 	playfield_buffer : &mut SMatrix<u8, 12, 19>,
-	piecepreview_buffer : &mut SMatrix<u8, 6, 6>,
-	obj : &CurrentObject, map : SMatrix<u8, 10, 18>,
-	level : u8, score : u32, lines : u32) {
+	obj : &CurrentObject, map : SMatrix<u8, 10, 18>) {
 
 	playfield(playfield_buffer, &map);
 	if obj.exists {
@@ -49,7 +46,7 @@ pub fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObj
 	}
 }
 
-pub fn check_out_of_bounds(x : i8, y : i8) -> bool {
+fn check_out_of_bounds(x : i8, y : i8) -> bool {
 	if x > -1 && x < 12 &&
 		y > -1 && y < 19 {
 
@@ -59,7 +56,7 @@ pub fn check_out_of_bounds(x : i8, y : i8) -> bool {
 	false
 }
 
-pub fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
+fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
 	// Write map (with x_offset of 1) into buffer
 	for x in 0..10 {
 		for y in 0..18 {
@@ -92,4 +89,97 @@ pub fn render_buffer(buffer : &SMatrix<u8, 12, 19>, x_offset : u8, y_offset : u8
 		}
 	}
 	Ok(())
+}
+
+pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObject) {
+
+	clear_piece_preview(preview);
+
+	let piece = player_obj.pieces[1];
+
+	preview[(2, 3)] = piece;
+
+	let mut x1 : u8 = 0;
+	let mut x2 : u8 = 0;
+	let mut x3 : u8 = 0;
+	let mut y1 : u8 = 0;
+	let mut y2 : u8 = 0;
+	let mut y3 : u8 = 0;
+
+	match piece { 
+		0 => { // L
+			x1 = 1;
+			y1 = 3;
+			x2 = 1;
+			y2 = 4;
+			x3 = 3;
+			y3 = 3;
+		}
+		1 => { // J
+			x1 = 1;
+			y1 = 3;
+			x2 = 3;
+			y2 = 3;
+			x3 = 1;
+			y3 = 4;
+		}
+		2 => { // I
+			x1 = 1;
+			y1 = 3;
+			x2 = 3;
+			y2 = 3;
+			x3 = 4;
+			y3 = 3;
+		}
+		3 => { // O
+			x1 = 3;
+			y1 = 3;
+			x2 = 3;
+			y2 = 4;
+			x3 = 4;
+			y3 = 4;
+		}
+		4 => { // Z
+			x1 = 1;
+			y1 = 3;
+			x2 = 1;
+			y2 = 3;
+			x3 = 1;
+			y3 = 3;
+		}
+		5 => { // S
+			x1 = 1;
+			y1 = 3;
+			x2 = 1;
+			y2 = 3;
+			x3 = 1;
+			y3 = 3;
+		}
+		6 => { // T
+			x1 = 1;
+			y1 = 3;
+			x2 = 1;
+			y2 = 3;
+			x3 = 1;
+			y3 = 3;
+		}
+		_ => {  }
+	}
+	preview[(x1 as usize, y1 as usize)] = piece;
+	preview[(x2 as usize, y2 as usize)] = piece;
+	preview[(x3 as usize, y3 as usize)] = piece;
+}
+
+fn clear_piece_preview(preview : &mut SMatrix<u8, 6, 6>) {
+	for i in 0..6 {
+		preview[(i, 0)] = 1;
+		preview[(i, 5)] = 1;
+		for j in 1..5 {
+			preview[(i, j)] = 0;
+		}
+	}
+	for i in 1..5 {
+		preview[(0, i)] = 1;
+		preview[(5, i)] = 1;
+	}
 }
