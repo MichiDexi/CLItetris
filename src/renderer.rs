@@ -111,7 +111,13 @@ pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObj
 
 	let piece = player_obj.pieces[1]+1;
 
-	preview[(2, 3)] = piece;
+	if piece-1 == 0 || piece-1 == 1 {
+		preview[(2, 2)] = piece;
+	}
+	else {
+		preview[(2, 3)] = piece;
+	}
+	
 
 	let mut x1 : u8 = 0;
 	let mut x2 : u8 = 0;
@@ -123,19 +129,19 @@ pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObj
 	match piece-1 { 
 		0 => { // L
 			x1 = 1;
-			y1 = 3;
+			y1 = 2;
 			x2 = 3;
-			y2 = 3;
-			x3 = 3;
-			y3 = 2;
+			y2 = 2;
+			x3 = 1;
+			y3 = 3;
 		}
 		1 => { // J
 			x1 = 1;
-			y1 = 3;
+			y1 = 2;
 			x2 = 3;
-			y2 = 3;
-			x3 = 1;
-			y3 = 2;
+			y2 = 2;
+			x3 = 3;
+			y3 = 3;
 		}
 		2 => { // I
 			x1 = 1;
