@@ -1,7 +1,6 @@
 use std::{
 	io
 };
-use nalgebra::SMatrix;
 use rand::prelude::*;
 
 pub struct CurrentObject {
@@ -31,7 +30,7 @@ impl CurrentObject {
 
 	pub fn tick_obj(
 		&mut self,
-		matrix : &mut SMatrix<u8, 10, 18>,
+		matrix : &mut [[u8; 18]; 10],
 		input : (i8, i8, bool, bool), // x, r, soft, hard
 		score_vars : (&mut u8, &mut u32, &mut u32)) -> io::Result<bool>
 	{
@@ -91,10 +90,10 @@ impl CurrentObject {
 				}
 			}
 			else {
-				matrix[(self.cx as usize, self.cy as usize)] = self.otype+1;
-				matrix[((self.x1+self.cx as i8) as usize, (self.y1+self.cy as i8) as usize)] = self.otype+1;
-				matrix[((self.x2+self.cx as i8) as usize, (self.y2+self.cy as i8) as usize)] = self.otype+1;
-				matrix[((self.x3+self.cx as i8) as usize, (self.y3+self.cy as i8) as usize)] = self.otype+1;
+				matrix[self.cx as usize][self.cy as usize] = self.otype+1;
+				matrix[(self.x1+self.cx as i8) as usize][(self.y1+self.cy as i8) as usize] = self.otype+1;
+				matrix[(self.x2+self.cx as i8) as usize][(self.y2+self.cy as i8) as usize] = self.otype+1;
+				matrix[(self.x3+self.cx as i8) as usize][(self.y3+self.cy as i8) as usize] = self.otype+1;
 				self.exists = false;
 				self.exist_delay = 10;
 				CurrentObject::check_rows(matrix, score_vars.0, score_vars.1, score_vars.2);
@@ -168,7 +167,7 @@ impl CurrentObject {
 
 	
 
-	fn try_move(&self, matrix : &SMatrix<u8, 10, 18>, x : i8, y : i8) -> bool {
+	fn try_move(&self, matrix : &[[u8; 18]; 10], x : i8, y : i8) -> bool {
 
 		let target_cx = self.cx as i8 +x;
 		let target_cy = self.cy as i8 +y;
@@ -190,10 +189,10 @@ impl CurrentObject {
 		}
 	
 		// Check matrix
-		if matrix[(target_cx as usize, target_cy as usize)] != 0 ||
-			matrix[(target_x1 as usize, target_y1 as usize)] != 0 ||
-			matrix[(target_x2 as usize, target_y2 as usize)] != 0 ||
-			matrix[(target_x3 as usize, target_y3 as usize)] != 0
+		if  matrix[target_cx as usize][target_cy as usize] != 0 ||
+			matrix[target_x1 as usize][target_y1 as usize] != 0 ||
+			matrix[target_x2 as usize][target_y2 as usize] != 0 ||
+			matrix[target_x3 as usize][target_y3 as usize] != 0
 		{
 			return false;
 		}
@@ -202,7 +201,7 @@ impl CurrentObject {
 
 
 
-	fn try_rotate(&self, matrix : &SMatrix<u8, 10, 18>, r : i8) -> bool {
+	fn try_rotate(&self, matrix : &[[u8; 18]; 10], r : i8) -> bool {
 
 		let target_cx = self.cx as i8;
 		let target_cy = self.cy as i8;
@@ -233,10 +232,10 @@ impl CurrentObject {
 		}
 
 		// Check matrix
-		if matrix[(target_cx as usize, target_cy as usize)] != 0 ||
-			matrix[(target_x1 as usize, target_y1 as usize)] != 0 ||
-			matrix[(target_x2 as usize, target_y2 as usize)] != 0 ||
-			matrix[(target_x3 as usize, target_y3 as usize)] != 0
+		if  matrix[target_cx as usize][target_cy as usize] != 0 ||
+			matrix[target_x1 as usize][target_y1 as usize] != 0 ||
+			matrix[target_x2 as usize][target_y2 as usize] != 0 ||
+			matrix[target_x3 as usize][target_y3 as usize] != 0
 		{
 			return false;
 		}
@@ -317,14 +316,14 @@ impl CurrentObject {
 
 	
 
-	fn check_rows(map : &mut SMatrix<u8, 10, 18>, level : &mut u8, score : &mut u32, lines : &mut u32) {
+	fn check_rows(map : &mut [[u8; 18]; 10], level : &mut u8, score : &mut u32, lines : &mut u32) {
 
 		let mut lines_this_frame : u8 = 0;
 	
 		for i in 0..18 {
 			let mut mark_row : bool = true;
 			for j in 0..10 {
-				if map[(j as usize, i as usize)] == 0 {
+				if map[j as usize][i as usize] == 0 {
 					mark_row = false;
 				}
 			}
@@ -346,14 +345,14 @@ impl CurrentObject {
 
 	
 
-	fn clear_row(map : &mut SMatrix<u8, 10, 18>, row : u8) {
+	fn clear_row(map : &mut [[u8; 18]; 10], row : u8) {
 		for i in 0..10 {
-			map[(i as usize, row as usize)] = 0;
+			map[i as usize][row as usize] = 0;
 		}
 
 		for i in 0..10 {
 			for j in 0..row {
-				map[(i as usize, (row-j) as usize)] = map[(i as usize, (row-j-1) as usize)];
+				map[i as usize][(row-j) as usize] = map[i as usize][(row-j-1) as usize];
 			}
 		}
 	}

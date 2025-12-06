@@ -4,21 +4,20 @@ use crossterm::{
 };
 use std::io;
 use std::io::{stdout, Write};
-use nalgebra::SMatrix;
 
 use crate::current_piece::CurrentObject;
 
 pub fn inject_buffers(
-	playfield_buffer : &mut SMatrix<u8, 12, 19>,
-	obj : &CurrentObject, map : SMatrix<u8, 10, 18>) {
+	playfield_buffer : &mut [[u8; 19]; 12],
+	obj : &CurrentObject, map : [[u8; 18]; 10]) {
 
-	playfield(playfield_buffer, &map);
+	playfield(playfield_buffer, map);
 	if obj.exists {
 		player_object(playfield_buffer, obj);
 	}
 }
 
-pub fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObject) {
+pub fn player_object(buffer : &mut [[u8; 19]; 12], player_obj : &CurrentObject) {
 
 	// Set positions
 	
@@ -33,16 +32,16 @@ pub fn player_object(buffer : &mut SMatrix<u8, 12, 19>, player_obj : &CurrentObj
 	
 	// Set object positions in buffer
 	if check_out_of_bounds(x, y) {
-		buffer[(1+x as usize, y as usize)] = player_obj.otype+1;
+		buffer[1+x as usize][y as usize] = player_obj.otype+1;
 	}
 	if check_out_of_bounds(x1, y1) {
-		buffer[(1+x1 as usize, y1 as usize)] = player_obj.otype+1;
+		buffer[1+x1 as usize][y1 as usize] = player_obj.otype+1;
 	}
 	if check_out_of_bounds(x2, y2) {
-		buffer[(1+x2 as usize, y2 as usize)] = player_obj.otype+1;
+		buffer[1+x2 as usize][y2 as usize] = player_obj.otype+1;
 	}
 	if check_out_of_bounds(x3, y3) {
-		buffer[(1+x3 as usize, y3 as usize)] = player_obj.otype+1;
+		buffer[1+x3 as usize][y3 as usize] = player_obj.otype+1;
 	}
 }
 
@@ -56,42 +55,42 @@ fn check_out_of_bounds(x : i8, y : i8) -> bool {
 	false
 }
 
-fn playfield(buffer : &mut SMatrix<u8, 12, 19>, map : &SMatrix<u8, 10, 18>) {
+fn playfield(buffer : &mut [[u8; 19]; 12], map : [[u8; 18]; 10]) {
 	// Write map (with x_offset of 1) into buffer
 	for x in 0..10 {
 		for y in 0..18 {
-			buffer[(x+1, y)] = map[(x, y)];
+			buffer[x+1][y] = map[x][y];
 		}
 	}
 }
 
-pub fn border(buffer : &mut SMatrix<u8, 12, 19>) {
+pub fn border(buffer : &mut [[u8; 19]; 12]) {
 	// Walls
 	for y in 0..19 {
-		buffer[(0,  y)] = 7;
-		buffer[(11, y)] = 7;
+		buffer[0][y] = 7;
+		buffer[11][y] = 7;
 	}
 
 	// Floor
 	for x in 1..11 {
-		buffer[(x, 18)] = 7;
+		buffer[x][18] = 7;
 	}
 }
 
-pub fn render_buffer(buffer : &SMatrix<u8, 12, 19>, x_offset : u8, y_offset : u8) -> io::Result<()> {
+pub fn render_buffer(buffer : &[[u8; 19]; 12], x_offset : u8, y_offset : u8) -> io::Result<()> {
 
 	let mut stdout = stdout();
 	
 	for y in 0..19 {
 		execute!(stdout, cursor::MoveTo(x_offset as u16, y as u16 + y_offset as u16)).unwrap();
 		for x in 0..12 {
-			write!(stdout, "\x1b[38;5;{}m██", buffer[(x, y)]).unwrap(); // Reads colored pixel from buffer
+			write!(stdout, "\x1b[38;5;{}m██", buffer[x][y]).unwrap(); // Reads colored pixel from buffer
 		}
 	}
 	Ok(())
 }
 
-pub fn render_piece_preview(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObject, x_offset : u8, y_offset : u8) -> io::Result<()> {
+pub fn render_piece_preview(preview : &mut [[u8; 6]; 6], player_obj : &CurrentObject, x_offset : u8, y_offset : u8) -> io::Result<()> {
 	let mut stdout = stdout();
 
 	set_next_piece(preview, player_obj);
@@ -99,7 +98,7 @@ pub fn render_piece_preview(preview : &mut SMatrix<u8, 6, 6>, player_obj : &Curr
 	for y in 0..6 {
 		execute!(stdout, cursor::MoveTo(x_offset as u16, y as u16 + y_offset as u16)).unwrap();
 		for x in 0..6 {
-			write!(stdout, "\x1b[38;5;{}m██", preview[(x, y)]).unwrap(); // Reads colored pixel from buffer
+			write!(stdout, "\x1b[38;5;{}m██", preview[x][y]).unwrap(); // Reads colored pixel from buffer
 		}
 	}
 	Ok(())
@@ -132,17 +131,17 @@ pub fn render_text(level : &u8, score : &u32, lines : &u32, x_offset : u8, y_off
 	Ok(())
 }
 
-pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObject) {
+pub fn set_next_piece(preview : &mut [[u8; 6]; 6], player_obj : &CurrentObject) {
 
 	clear_piece_preview(preview);
 
 	let piece = player_obj.pieces[1]+1;
 
 	if piece-1 == 0 || piece-1 == 1 {
-		preview[(2, 2)] = piece;
+		preview[2][2] = piece;
 	}
 	else {
-		preview[(2, 3)] = piece;
+		preview[2][3] = piece;
 	}
 	
 
@@ -212,21 +211,21 @@ pub fn set_next_piece(preview : &mut SMatrix<u8, 6, 6>, player_obj : &CurrentObj
 		}
 		_ => {  }
 	}
-	preview[(x1 as usize, y1 as usize)] = piece;
-	preview[(x2 as usize, y2 as usize)] = piece;
-	preview[(x3 as usize, y3 as usize)] = piece;
+	preview[x1 as usize][y1 as usize] = piece;
+	preview[x2 as usize][y2 as usize] = piece;
+	preview[x3 as usize][y3 as usize] = piece;
 }
 
-fn clear_piece_preview(preview : &mut SMatrix<u8, 6, 6>) {
+fn clear_piece_preview(preview : &mut [[u8; 6]; 6]) {
 	for i in 0..6 {
-		preview[(i, 0)] = 7;
-		preview[(i, 5)] = 7;
+		preview[i][0] = 7;
+		preview[i][5] = 7;
 		for j in 1..5 {
-			preview[(i, j)] = 0;
+			preview[i][j] = 0;
 		}
 	}
 	for i in 1..5 {
-		preview[(0, i)] = 7;
-		preview[(5, i)] = 7;
+		preview[0][i] = 7;
+		preview[5][i] = 7;
 	}
 }

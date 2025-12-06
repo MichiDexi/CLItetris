@@ -1,5 +1,4 @@
 // Headers
-use nalgebra::SMatrix;
 use std::{
 	time::{
 		Duration,
@@ -93,9 +92,9 @@ fn game(
 	};
 	let _ = cur_obj.reset_obj(); // Piece gets reset
 
-	let mut map : SMatrix<u8, 10, 18> = SMatrix::zeros(); // The playfield
-	let mut playfield_buffer : SMatrix<u8, 12, 19> = SMatrix::zeros(); // Used to render playfield
-	let mut piecepreview_buffer : SMatrix<u8, 6, 6> = SMatrix::zeros(); // Used to render piece preview
+	let mut map : [[u8; 18]; 10] = [[0; 18]; 10]; // The playfield
+	let mut playfield_buffer : [[u8; 19]; 12] = [[0; 19]; 12]; // Used to render playfield
+	let mut piecepreview_buffer : [[u8; 6]; 6] = [[0; 6]; 6]; // Used to render piece preview
 
 	let (cols, rows) = size().unwrap(); // Gets size of terminal
 	let x_offset = (cols/2) as u8 -18; // Render x offset
